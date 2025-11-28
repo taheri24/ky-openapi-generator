@@ -12,10 +12,9 @@
     "dev": "tsc --watch",
     "gen:example": "ts-node src/cli.ts example/petstore.openapi.json --output example/generated",
     "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
-    "publish:patch": "bash scripts/publish.sh patch",
-    "publish:minor": "bash scripts/publish.sh minor",
-    "publish:major": "bash scripts/publish.sh major",
-    "publish:dry": "bash scripts/publish.sh patch true"
+    "prepublishOnly": "npm run build",
+    "publish:dry": "npm publish --dry-run",
+    "publish": "npm publish"
   },
   "keywords": [
     "openapi",
@@ -25,8 +24,8 @@
     "typescript"
   ],
   "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com"
+    "name": "Majid Taheri",
+    "email": "taheri.interview@gmail.com"
   },
   "license": "MIT",
   "repository": {
