@@ -23,8 +23,24 @@
     "code-generator",
     "typescript"
   ],
-  "author": "",
+  "author": {
+    "name": "Majid Taheri",
+    "email": "taheri.interview@gmail.com"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taheri24/ky-openapi-generator"
+  },
+  "bugs": {
+    "url": "https://github.com/taheri24/ky-openapi-generator/issues"
+  },
+  "homepage": "https://github.com/taheri24/ky-openapi-generator#readme",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "dependencies": {
     "ky": "^1.2.3"
   },
