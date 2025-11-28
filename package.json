@@ -11,7 +11,10 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "gen:example": "ts-node src/cli.ts example/petstore.openapi.json --output example/generated",
-    "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated"
+    "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
+    "prepublishOnly": "npm run build",
+    "publish:dry": "npm publish --dry-run",
+    "publish": "npm publish"
   },
   "keywords": [
     "openapi",
