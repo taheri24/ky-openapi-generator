@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+
+/**
+ * CLI for Ky OpenAPI Generator
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { OpenAPIParser } from './parser';
+import { KyClientGenerator } from './generator';
+import { OpenAPISpec } from './types';
+
+interface CLIOptions {
+  output?: string;
+  baseUrl?: string;
+  clientName?: string;
+  typesOnly?: boolean;
+}
+
+function parseArgs(): { specPath: string; options: CLIOptions } {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    printHelp();
+    process.exit(1);
+  }
+
+  const specPath = args[0];
+  const options: CLIOptions = {};
+
+  for (let i = 1; i < args.length; i++) {
+    const arg = args[i];
+
+    if (arg === '--output' || arg === '-o') {
+      options.output = args[++i];
+    } else if (arg === '--baseUrl' || arg === '-b') {
+      options.baseUrl = args[++i];
+    } else if (arg === '--clientName' || arg === '-c') {
+      options.clientName = args[++i];
+    } else if (arg === '--typesOnly' || arg === '-t') {
+      options.typesOnly = true;
+    } else if (arg === '--help' || arg === '-h') {
+      printHelp();
+      process.exit(0);
+    } else if (arg === '--version' || arg === '-v') {
+      printVersion();
+      process.exit(0);
+    }
+  }
+
+  return { specPath, options };
+}
+
+function printHelp(): void {
+  console.log(`
+Ky OpenAPI Generator - Generate typed HTTP clients from OpenAPI specs
+
+Usage:
+  ky-openapi-gen <spec-path> [options]
+
+Arguments:
+  <spec-path>    Path to OpenAPI specification file (JSON or YAML)
+
+Options:
+  -o, --output       Output file path (default: stdout)
+  -b, --baseUrl      Base URL for API (overrides spec URL)
+  -c, --clientName   Name of generated client class (default: ApiClient)
+  -t, --typesOnly    Generate only TypeScript types (no client class)
+  -h, --help         Show this help message
+  -v, --version      Show version
+
+Examples:
+  # Generate client to stdout
+  ky-openapi-gen openapi.json
+
+  # Generate client to file
+  ky-openapi-gen openapi.json --output client.ts
+
+  # Custom base URL and client name
+  ky-openapi-gen openapi.json -b https://api.example.com -c MyApiClient
+
+  # Generate types only
+  ky-openapi-gen openapi.json --typesOnly
+`);
+}
+
+function printVersion(): void {
+  const pkg = require('../package.json');
+  console.log(`Ky OpenAPI Generator v${pkg.version}`);
+}
+
+function loadSpec(specPath: string): OpenAPISpec {
+  if (!fs.existsSync(specPath)) {
+    console.error(`Error: Specification file not found: ${specPath}`);
+    process.exit(1);
+  }
+
+  try {
+    const content = fs.readFileSync(specPath, 'utf-8');
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(content);
+    } catch {
+      // If JSON parsing fails, provide helpful error
+      console.error(`Error: Failed to parse specification file. Make sure it's valid JSON.`);
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(`Error reading specification file: ${error}`);
+    process.exit(1);
+  }
+}
+
+async function main(): Promise<void> {
+  try {
+    const { specPath, options } = parseArgs();
+
+    console.error(`Loading specification from: ${specPath}`);
+    const spec = loadSpec(specPath);
+
+    console.error(`Parsing OpenAPI specification...`);
+    const parser = new OpenAPIParser(spec);
+    const endpoints = parser.parse();
+    console.error(`Found ${endpoints.length} endpoints`);
+
+    const baseUrl = options.baseUrl || parser.getBaseUrl();
+    const clientName = options.clientName || 'ApiClient';
+
+    console.error(`Generating Ky HTTP client...`);
+    const generator = new KyClientGenerator(endpoints, {
+      baseUrl,
+      clientName,
+      typesOnly: options.typesOnly,
+    });
+
+    const code = generator.generate();
+
+    if (options.output) {
+      const outputDir = path.dirname(options.output);
+
+      // Create output directory if it doesn't exist
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      fs.writeFileSync(options.output, code);
+      console.error(`✓ Client generated successfully: ${options.output}`);
+    } else {
+      console.log(code);
+    }
+  } catch (error) {
+    console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  }
+}
+
+main();

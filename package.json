@@ -1,0 +1,33 @@
+{
+  "name": "ky-openapi-generator",
+  "version": "1.0.0",
+  "description": "Generate typed HTTP clients from OpenAPI specs using ky.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "ky-openapi-gen": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "gen:example": "ts-node src/cli.ts example/petstore.openapi.json --output example/generated",
+    "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated"
+  },
+  "keywords": [
+    "openapi",
+    "ky",
+    "http-client",
+    "code-generator",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ky": "^1.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}
