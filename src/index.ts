@@ -2,8 +2,8 @@
  * Ky OpenAPI Generator - Main exports
  */
 
-export { OpenAPIParser } from './parser';
-export { KyClientGenerator } from './generator';
+export { OpenAPIParser } from './parser.js';
+export { KyClientGenerator } from './generator.js';
 export type {
   OpenAPISpec,
   PathItem,
@@ -17,11 +17,11 @@ export type {
   ParsedRequestBody,
   ParsedResponse,
   GeneratorConfig,
-} from './types';
+} from './types.js';
 
-import { OpenAPIParser } from './parser';
-import { KyClientGenerator } from './generator';
-import { OpenAPISpec, GeneratorConfig } from './types';
+import { OpenAPIParser } from './parser.js';
+import { KyClientGenerator } from './generator.js';
+import { OpenAPISpec, GeneratorConfig } from './types.js';
 import * as fs from 'fs';
 
 /**

@@ -2,7 +2,7 @@
  * OpenAPI specification parser
  */
 
-import { OpenAPISpec, ParsedEndpoint, ParsedParameter, ParsedResponse, Schema } from './types';
+import { OpenAPISpec, ParsedEndpoint, ParsedParameter, ParsedResponse, Schema } from './types.js';
 
 export class OpenAPIParser {
   private spec: OpenAPISpec;
