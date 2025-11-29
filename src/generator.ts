@@ -22,6 +22,11 @@ export class KyClientGenerator {
   generate(): string {
     const parts: string[] = [];
 
+    // Add banner if provided
+    if (this.config.banner) {
+      parts.push(this.generateBanner());
+    }
+
     // Add imports
     parts.push(this.generateImports());
 
@@ -34,6 +39,14 @@ export class KyClientGenerator {
     }
 
     return parts.join('\n\n');
+  }
+
+  private generateBanner(): string {
+    if (!this.config.banner) return '';
+
+    const lines = this.config.banner.split('\n');
+    const commentLines = lines.map(line => `// ${line}`);
+    return commentLines.join('\n');
   }
 
   private generateImports(): string {

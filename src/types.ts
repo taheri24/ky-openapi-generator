@@ -117,4 +117,5 @@ export interface GeneratorConfig {
   clientName?: string;
   typesOnly?: boolean;
   exportAsDefault?: boolean;
+  banner?: string;
 }

@@ -58,6 +58,7 @@ ky-openapi-gen <spec-path> [options]
 | `--output <path>` | `-o` | Output file path (prints to stdout if not specified) | - |
 | `--baseUrl <url>` | `-b` | Override base URL from spec | Spec's first server |
 | `--clientName <name>` | `-c` | Name of generated client class | `ApiClient` |
+| `--banner <text>` | - | Banner comment to prepend to generated file | - |
 | `--typesOnly` | `-t` | Generate only TypeScript types, no client class | `false` |
 | `--help` | `-h` | Show help message | - |
 | `--version` | `-v` | Show version | - |
@@ -81,6 +82,12 @@ ky-openapi-gen petstore.json \
   --clientName PetstoreClient
 ```
 
+#### Add a banner to the generated file
+```bash
+ky-openapi-gen petstore.json --output ./src/api-client.ts \
+  --banner "Auto-generated code. Do not edit manually."
+```
+
 #### Generate only TypeScript types
 ```bash
 ky-openapi-gen petstore.json --typesOnly
@@ -95,6 +102,7 @@ import * as fs from 'fs';
 const code = generateKyClient('openapi.json', {
   baseUrl: 'https://api.example.com',
   clientName: 'MyApiClient',
+  banner: 'Auto-generated code. Do not edit manually.',
 });
 
 fs.writeFileSync('client.ts', code);
@@ -211,6 +219,7 @@ Generates a Ky HTTP client from an OpenAPI specification.
   clientName?: string;        // Name of generated class
   typesOnly?: boolean;        // Generate types only
   exportAsDefault?: boolean;  // Default export
+  banner?: string;            // Banner comment to prepend
 }
 ```
 
