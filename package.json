@@ -4,6 +4,7 @@
   "description": "Generate typed HTTP clients from OpenAPI specs using ky.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "bin": {
     "ky-openapi-gen": "dist/cli.js"
   },
