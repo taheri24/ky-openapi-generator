@@ -7,9 +7,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseArgs as parseArgsUtil } from 'node:util';
-import { OpenAPIParser } from './parser.js';
-import { KyClientGenerator } from './generator.js';
-import { OpenAPISpec } from './types.js';
+import { OpenAPIParser } from './parser';
+import { KyClientGenerator } from './generator';
+import { OpenAPISpec } from './types';
 
 interface CLIOptions {
   output?: string;
@@ -137,7 +137,8 @@ Examples:
 }
 
 function printVersion(): void {
-  const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf-8'));
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const pkg = require('../package.json');
   console.log(`Ky OpenAPI Generator v${pkg.version}`);
 }
 

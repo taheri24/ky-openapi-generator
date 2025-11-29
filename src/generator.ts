@@ -2,8 +2,8 @@
  * Ky.js HTTP client code generator
  */
 
-import { ParsedEndpoint, GeneratorConfig } from './types.js';
-import { calculateChecksum } from './checksum.js';
+import { ParsedEndpoint, GeneratorConfig } from './types';
+import { calculateChecksum } from './checksum';
 
 export class KyClientGenerator {
   private endpoints: ParsedEndpoint[];

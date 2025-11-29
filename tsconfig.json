@@ -13,6 +13,10 @@
     "resolveJsonModule": true,
     "moduleResolution": "node"
   },
+  "ts-node": {
+    "esm": true,
+    "experimentalEsm": true
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }
