@@ -170,8 +170,15 @@ ${fields}
       ? `export default ${clientName};`
       : `export { ${clientName} };`;
 
+    // Generate checksum field if configured
+    let checksumField = '';
+    if (this.config.checksumMethod && this.config.inputFilePath) {
+      const checksum = calculateChecksum(this.config.inputFilePath, this.config.checksumMethod);
+      checksumField = `  static readonly SPEC_CHECKSUM = '${checksum}';\n`;
+    }
+
     return `export class ${clientName} {
-  private baseUrl: string;
+${checksumField}  private baseUrl: string;
   private ky: typeof ky;
 
   constructor(baseUrl: string = '${this.config.baseUrl}') {
