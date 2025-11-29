@@ -9,6 +9,7 @@ Generate fully-typed HTTP clients for your APIs directly from OpenAPI specificat
 - 🎯 **Ky.js Integration** - Uses the lightweight ky.js HTTP client
 - ⚙️ **Flexible Configuration** - Customize base URLs, client names, and more
 - 🛠️ **CLI Interface** - Easy-to-use command-line tool
+- ✅ **File Integrity** - Optional checksum validation (CRC32, MD5, SHA1, SHA256) for input files
 - 📦 **Zero Dependencies** - Only requires ky.js at runtime
 
 ## Installation
@@ -59,6 +60,7 @@ ky-openapi-gen <spec-path> [options]
 | `--baseUrl <url>` | `-b` | Override base URL from spec | Spec's first server |
 | `--clientName <name>` | `-c` | Name of generated client class | `ApiClient` |
 | `--banner <text>` | - | Banner comment to prepend to generated file | - |
+| `--checksum <method>` | - | Include file checksum (crc32, md5, sha1, sha256) | - |
 | `--typesOnly` | `-t` | Generate only TypeScript types, no client class | `false` |
 | `--help` | `-h` | Show help message | - |
 | `--version` | `-v` | Show version | - |
@@ -86,6 +88,15 @@ ky-openapi-gen petstore.json \
 ```bash
 ky-openapi-gen petstore.json --output ./src/api-client.ts \
   --banner "Auto-generated code. Do not edit manually."
+```
+
+#### Include checksum for file integrity verification
+```bash
+# Using SHA256 checksum
+ky-openapi-gen petstore.json --checksum sha256 --output ./src/api-client.ts
+
+# Using MD5 checksum (default when flag is used)
+ky-openapi-gen petstore.json --checksum md5 --output ./src/api-client.ts
 ```
 
 #### Generate only TypeScript types
@@ -215,11 +226,13 @@ Generates a Ky HTTP client from an OpenAPI specification.
 **GeneratorConfig:**
 ```typescript
 {
-  baseUrl?: string;           // Base URL for API
-  clientName?: string;        // Name of generated class
-  typesOnly?: boolean;        // Generate types only
-  exportAsDefault?: boolean;  // Default export
-  banner?: string;            // Banner comment to prepend
+  baseUrl?: string;                      // Base URL for API
+  clientName?: string;                   // Name of generated class
+  typesOnly?: boolean;                   // Generate types only
+  exportAsDefault?: boolean;             // Default export
+  banner?: string;                       // Banner comment to prepend
+  checksumMethod?: 'crc32' | 'md5' | 'sha1' | 'sha256';  // File checksum method
+  inputFilePath?: string;                // Path to input OpenAPI spec file
 }
 ```
 
@@ -258,6 +271,7 @@ ky-openapi-generator/
 │   ├── types.ts          # Type definitions
 │   ├── parser.ts         # OpenAPI parser
 │   ├── generator.ts      # Code generator
+│   ├── checksum.ts       # Checksum utilities (CRC32, MD5, SHA1, SHA256)
 │   ├── cli.ts            # CLI interface
 │   └── index.ts          # Main exports
 ├── example/
