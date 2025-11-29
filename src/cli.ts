@@ -6,6 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { parseArgs as parseArgsUtil } from 'node:util';
 import { OpenAPIParser } from './parser';
 import { KyClientGenerator } from './generator';
 import { OpenAPISpec } from './types';
@@ -19,37 +20,71 @@ interface CLIOptions {
 }
 
 function parseArgs(): { specPath: string; options: CLIOptions } {
-  const args = process.argv.slice(2);
+  const { values, positionals } = parseArgsUtil({
+    args: process.argv.slice(2),
+    options: {
+      output: {
+        type: 'string',
+        short: 'o',
+        description: 'Output file path (default: stdout)',
+      },
+      baseUrl: {
+        type: 'string',
+        short: 'b',
+        description: 'Base URL for API (overrides spec URL)',
+      },
+      clientName: {
+        type: 'string',
+        short: 'c',
+        description: 'Name of generated client class (default: ApiClient)',
+      },
+      banner: {
+        type: 'string',
+        description: 'Banner comment to prepend to generated file',
+      },
+      typesOnly: {
+        type: 'boolean',
+        short: 't',
+        description: 'Generate only TypeScript types (no client class)',
+      },
+      help: {
+        type: 'boolean',
+        short: 'h',
+        description: 'Show this help message',
+      },
+      version: {
+        type: 'boolean',
+        short: 'v',
+        description: 'Show version',
+      },
+    },
+    strict: true,
+    allowPositionals: true,
+  });
 
-  if (args.length === 0) {
+  if (values.help) {
+    printHelp();
+    process.exit(0);
+  }
+
+  if (values.version) {
+    printVersion();
+    process.exit(0);
+  }
+
+  if (positionals.length === 0) {
     printHelp();
     process.exit(1);
   }
 
-  const specPath = args[0];
-  const options: CLIOptions = {};
-
-  for (let i = 1; i < args.length; i++) {
-    const arg = args[i];
-
-    if (arg === '--output' || arg === '-o') {
-      options.output = args[++i];
-    } else if (arg === '--baseUrl' || arg === '-b') {
-      options.baseUrl = args[++i];
-    } else if (arg === '--clientName' || arg === '-c') {
-      options.clientName = args[++i];
-    } else if (arg === '--banner') {
-      options.banner = args[++i];
-    } else if (arg === '--typesOnly' || arg === '-t') {
-      options.typesOnly = true;
-    } else if (arg === '--help' || arg === '-h') {
-      printHelp();
-      process.exit(0);
-    } else if (arg === '--version' || arg === '-v') {
-      printVersion();
-      process.exit(0);
-    }
-  }
+  const specPath = positionals[0];
+  const options: CLIOptions = {
+    output: values.output,
+    baseUrl: values.baseUrl,
+    clientName: values.clientName,
+    banner: values.banner,
+    typesOnly: values.typesOnly,
+  };
 
   return { specPath, options };
 }
