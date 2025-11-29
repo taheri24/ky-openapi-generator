@@ -118,4 +118,6 @@ export interface GeneratorConfig {
   typesOnly?: boolean;
   exportAsDefault?: boolean;
   banner?: string;
+  checksumMethod?: 'crc32' | 'md5' | 'sha1' | 'sha256';
+  inputFilePath?: string;
 }

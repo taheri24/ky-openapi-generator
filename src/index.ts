@@ -41,6 +41,7 @@ export function generateKyClient(
   const generator = new KyClientGenerator(endpoints, {
     ...config,
     baseUrl,
+    inputFilePath: config?.inputFilePath || specPath,
   });
 
   return generator.generate();
