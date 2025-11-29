@@ -137,6 +137,7 @@ Examples:
 }
 
 function printVersion(): void {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const pkg = require('../package.json');
   console.log(`Ky OpenAPI Generator v${pkg.version}`);
 }

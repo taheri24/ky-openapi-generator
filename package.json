@@ -4,13 +4,15 @@
   "description": "Generate typed HTTP clients from OpenAPI specs using ky.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "bin": {
     "ky-openapi-gen": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run build:fix-esm",
+    "build:fix-esm": "node scripts/fix-esm-imports.js",
     "dev": "tsc --watch",
-    "gen:example": "ts-node src/cli.ts example/petstore.openapi.json --output example/generated",
+    "gen:example": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
     "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
     "prepublishOnly": "npm run build",
     "publish:dry": "npm publish --dry-run",
