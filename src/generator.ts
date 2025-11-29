@@ -3,6 +3,7 @@
  */
 
 import { ParsedEndpoint, GeneratorConfig } from './types';
+import { calculateChecksum } from './checksum';
 
 export class KyClientGenerator {
   private endpoints: ParsedEndpoint[];
@@ -27,6 +28,11 @@ export class KyClientGenerator {
       parts.push(this.generateBanner());
     }
 
+    // Add checksum if provided
+    if (this.config.checksumMethod && this.config.inputFilePath) {
+      parts.push(this.generateChecksum());
+    }
+
     // Add imports
     parts.push(this.generateImports());
 
@@ -47,6 +53,14 @@ export class KyClientGenerator {
     const lines = this.config.banner.split('\n');
     const commentLines = lines.map(line => `// ${line}`);
     return commentLines.join('\n');
+  }
+
+  private generateChecksum(): string {
+    if (!this.config.checksumMethod || !this.config.inputFilePath) return '';
+
+    const method = this.config.checksumMethod;
+    const checksum = calculateChecksum(this.config.inputFilePath, method);
+    return `// Generated from OpenAPI spec with ${method.toUpperCase()} checksum: ${checksum}`;
   }
 
   private generateImports(): string {
