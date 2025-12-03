@@ -11,6 +11,8 @@ Generate fully-typed HTTP clients for your APIs directly from OpenAPI specificat
 - 🛠️ **CLI Interface** - Easy-to-use command-line tool
 - ✅ **File Integrity** - Optional checksum validation (CRC32, MD5, SHA1, SHA256) for input files
 - 📦 **Zero Dependencies** - Only requires ky.js at runtime
+- 🧠 **Smart Operation ID Suggestion** - Intelligently generates meaningful method names from API metadata
+- 📦 **pnpm Ready** - Optimized for pnpm package manager with npm fallback support
 
 ## Installation
 
@@ -169,6 +171,16 @@ See the `example/` directory for a complete working example using the Swagger Pe
 - `example/generated-client.ts` - Generated client code
 - `example/usage-example.ts` - Usage examples
 
+## Smart Operation ID Suggestion
+
+The generator includes an intelligent operation ID suggestion engine with three verbosity levels for generating meaningful method names:
+
+- **Low**: Path-based naming → `GET /pets` becomes `getPets`
+- **Medium**: Includes path parameters → `GET /pets/{petId}` becomes `getPetsPetid`
+- **High**: Semantic keywords from descriptions → `GET /pets/{petId}` with "Info for a specific pet" becomes `getPetInfo`
+
+This ensures every generated method has a clear, descriptive name that reflects its purpose, even when your OpenAPI spec lacks explicit operation IDs. The generator automatically detects and resolves naming conflicts across all levels, applying numeric suffixes only when necessary (e.g., `getUsers_1`, `getUsers_2`).
+
 ## Supported OpenAPI Features
 
 ✅ **Fully Supported:**
@@ -238,29 +250,39 @@ Generates a Ky HTTP client from an OpenAPI specification.
 
 ## Development
 
+### Quick Start with Make
+
+Use the included Makefile for streamlined development workflows. Common commands: `make build`, `make test`, `make gen-example`, and for publishing: `make publish-check && make publish-dry && make publish`. See `MAKEFILE_GUIDE.md` for comprehensive documentation on all available targets and workflows.
+
 ### Setup
 
 ```bash
-npm install
-npm run build
+pnpm install  # or npm install for npm fallback
+pnpm run build
 ```
 
 ### Build
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Watch Mode
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ### Generate Example
 
 ```bash
-npm run gen:example:build
+pnpm run gen:example:build
+```
+
+### Run Tests
+
+```bash
+pnpm test
 ```
 
 ## Project Structure
