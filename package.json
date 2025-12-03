@@ -1,6 +1,6 @@
 {
   "name": "ky-openapi-generator",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Generate typed HTTP clients from OpenAPI specs using ky.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,8 +15,7 @@
     "gen:example": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
     "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
     "prepublishOnly": "npm run build",
-    "publish:dry": "npm publish --dry-run",
-    "publish": "npm publish"
+    "publish:dry": "npm publish --dry-run" 
   },
   "keywords": [
     "openapi",
