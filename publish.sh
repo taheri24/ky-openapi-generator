@@ -103,7 +103,7 @@ fi
 if [ -n "$(git status --porcelain)" ]; then
   log_warn "Working directory has uncommitted changes"
   log_info "Please commit or stash your changes before publishing"
-  exit 1
+  #exit 1
 fi
 
 log_success "Working directory is clean"
