@@ -3,6 +3,7 @@
  */
 
 import { OpenAPISpec, ParsedEndpoint, ParsedParameter, ParsedResponse, Schema } from './types';
+import { suggestOperationID, SuggestionVerbosityLevel } from './operationIdSuggester';
 
 export class OpenAPIParser {
   private spec: OpenAPISpec;
@@ -24,6 +25,7 @@ export class OpenAPIParser {
   parse(): ParsedEndpoint[] {
     const endpoints: ParsedEndpoint[] = [];
 
+    // First pass: collect all endpoints with their metadata
     Object.entries(this.spec.paths).forEach(([path, pathItem]) => {
       const methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
 
@@ -31,11 +33,10 @@ export class OpenAPIParser {
         const operation = (pathItem as any)[method];
         if (!operation) return;
 
-        const operationId = operation.operationId || this.generateOperationId(path, method);
         const endpoint: ParsedEndpoint = {
           path,
           method: method.toUpperCase(),
-          operationId,
+          operationId: operation.operationId || '',
           summary: operation.summary,
           description: operation.description,
           parameters: this.parseParameters(path, operation.parameters || [], pathItem.parameters || []),
@@ -48,15 +49,119 @@ export class OpenAPIParser {
       });
     });
 
+    // Second pass: resolve operation IDs level by level with duplicate detection
+    this.resolveOperationIds(endpoints);
+
     return endpoints;
   }
 
-  private generateOperationId(path: string, method: string): string {
-    const pathParts = path
-      .split('/')
-      .filter((p) => p && !p.startsWith('{'))
-      .join('_');
-    return `${method.toLowerCase()}_${pathParts || 'root'}`.replace(/[^a-zA-Z0-9_]/g, '_');
+  /**
+   * Resolves operation IDs for all endpoints, escalating verbosity level if duplicates are detected
+   * @param endpoints - All parsed endpoints to resolve IDs for
+   */
+  private resolveOperationIds(endpoints: ParsedEndpoint[]): void {
+    // Separate endpoints with explicit operationIds from those needing suggestion
+    let needingSuggestion = endpoints.filter((ep) => !ep.operationId);
+    const withExplicitIds = endpoints.filter((ep) => ep.operationId);
+
+    if (needingSuggestion.length === 0) {
+      return; // All endpoints have explicit IDs
+    }
+
+    // Try each verbosity level until all suggested endpoints have unique IDs
+    const verbosityLevels: SuggestionVerbosityLevel[] = ['low', 'medium', 'high'];
+
+    for (const level of verbosityLevels) {
+      // Suggest IDs for all endpoints needing suggestion at this level
+      needingSuggestion.forEach((endpoint) => {
+        // Clear operationId before calling suggestOperationID
+        endpoint.operationId = '';
+        endpoint.operationId = suggestOperationID(endpoint, level);
+      });
+
+      // Check for duplicates among suggested IDs and explicit IDs
+      const suggestedIds = needingSuggestion.map((ep) => ep.operationId);
+      const allIds = [
+        ...withExplicitIds.map((ep) => ep.operationId),
+        ...suggestedIds,
+      ];
+
+      const duplicates = this.findDuplicates(allIds);
+
+      // If no duplicates, we're done
+      if (duplicates.size === 0) {
+        return;
+      }
+
+      // If this is the last level and we still have duplicates, we need to handle them
+      if (level === 'high') {
+        // Append a numeric suffix to duplicates to make them unique
+        this.resolveRemainingDuplicates(endpoints, duplicates);
+        return;
+      }
+
+      // Separate endpoints with duplicates from those that are resolved
+      const resolvedEndpoints: ParsedEndpoint[] = [];
+      const stillDuplicateEndpoints: ParsedEndpoint[] = [];
+
+      needingSuggestion.forEach((ep) => {
+        if (duplicates.has(ep.operationId)) {
+          stillDuplicateEndpoints.push(ep);
+        } else {
+          resolvedEndpoints.push(ep);
+        }
+      });
+
+      // Move resolved endpoints to the explicit IDs list
+      withExplicitIds.push(...resolvedEndpoints);
+
+      if (stillDuplicateEndpoints.length === 0) {
+        return; // All resolved
+      }
+
+      // Continue with only the endpoints that still have duplicates
+      needingSuggestion = stillDuplicateEndpoints;
+    }
+  }
+
+  /**
+   * Finds duplicate values in an array
+   * @param values - Array of values to check
+   * @returns Set of duplicate values
+   */
+  private findDuplicates(values: string[]): Set<string> {
+    const seen = new Set<string>();
+    const duplicates = new Set<string>();
+
+    values.forEach((value) => {
+      if (seen.has(value)) {
+        duplicates.add(value);
+      } else {
+        seen.add(value);
+      }
+    });
+
+    return duplicates;
+  }
+
+  /**
+   * Resolves remaining duplicates by appending numeric suffixes
+   * @param endpoints - All endpoints
+   * @param duplicates - Set of duplicate operation IDs
+   */
+  private resolveRemainingDuplicates(endpoints: ParsedEndpoint[], duplicates: Set<string>): void {
+    const idCounter: Record<string, number> = {};
+
+    endpoints.forEach((endpoint) => {
+      if (duplicates.has(endpoint.operationId)) {
+        const baseId = endpoint.operationId;
+        if (!idCounter[baseId]) {
+          idCounter[baseId] = 1;
+        }
+        endpoint.operationId = `${baseId}_${idCounter[baseId]}`;
+        idCounter[baseId]++;
+      }
+    });
   }
 
   private parseParameters(path: string, operationParams: any[], pathParams: any[]): ParsedParameter[] {
