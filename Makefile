@@ -1,4 +1,11 @@
-.PHONY: help build dev test test-watch test-coverage clean gen gen-example install check-bun publish publish-dry lint format
+.PHONY: help build dev test test-watch test-coverage clean gen gen-example install check-bun check-pnpm publish publish-dry lint format setup rebuild all watch
+
+# Detect package manager (pnpm preferred, fallback to npm)
+ifeq ($(shell command -v pnpm 2> /dev/null),)
+  PKG_MANAGER := npm
+else
+  PKG_MANAGER := pnpm
+endif
 
 # Color output
 RED := \033[0;31m
@@ -10,6 +17,7 @@ NC := \033[0m # No Color
 help:
 	@echo "$(BLUE)╔═══════════════════════════════════════════════════════════════╗$(NC)"
 	@echo "$(BLUE)║     ky-openapi-generator - Development & Build Tools           ║$(NC)"
+	@echo "$(BLUE)║     (Package Manager: $(PKG_MANAGER))$(NC)"
 	@echo "$(BLUE)╚═══════════════════════════════════════════════════════════════╝$(NC)"
 	@echo ""
 	@echo "$(GREEN)Build Commands:$(NC)"
@@ -30,6 +38,7 @@ help:
 	@echo "$(GREEN)CLI Commands (with bun):$(NC)"
 	@echo "  make cli ARGS=\"<args>\"  - Run CLI with bun (e.g., make cli ARGS=\"spec.json --output client.ts\")"
 	@echo "  make cli-help           - Show CLI help message"
+	@echo "  make cli-version        - Show CLI version"
 	@echo ""
 	@echo "$(GREEN)Publishing Commands:$(NC)"
 	@echo "  make publish-dry        - Test publish (dry-run)"
@@ -38,6 +47,7 @@ help:
 	@echo ""
 	@echo "$(GREEN)Utility Commands:$(NC)"
 	@echo "  make install            - Install dependencies"
+	@echo "  make check-pnpm         - Check if pnpm is installed"
 	@echo "  make check-bun          - Check if bun is installed"
 	@echo "  make lint               - Run linter (if configured)"
 	@echo "  make format             - Format code (if configured)"
@@ -55,13 +65,13 @@ help:
 # ============================================================================
 
 build:
-	@echo "$(BLUE)Building TypeScript...$(NC)"
-	@npm run build
+	@echo "$(BLUE)Building TypeScript (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) run build
 	@echo "$(GREEN)✓ Build completed$(NC)"
 
 dev:
-	@echo "$(BLUE)Starting watch mode...$(NC)"
-	npm run dev
+	@echo "$(BLUE)Starting watch mode (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) run dev
 
 clean:
 	@echo "$(BLUE)Cleaning build artifacts...$(NC)"
@@ -73,25 +83,33 @@ clean:
 # ============================================================================
 
 test:
-	@echo "$(BLUE)Running tests...$(NC)"
-	@npm test
+	@echo "$(BLUE)Running tests (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) test
 
 test-watch:
-	@echo "$(BLUE)Running tests in watch mode...$(NC)"
-	@npm run test-watch
+	@echo "$(BLUE)Running tests in watch mode (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) run test-watch
 
 test-coverage:
-	@echo "$(BLUE)Running tests with coverage...$(NC)"
-	@npm run test-coverage
+	@echo "$(BLUE)Running tests with coverage (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) run test-coverage
 
 # ============================================================================
 # GENERATION COMMANDS
 # ============================================================================
 
+check-pnpm:
+	@command -v pnpm >/dev/null 2>&1 && echo "$(GREEN)✓ pnpm is installed ($(shell pnpm --version))$(NC)" || echo "$(YELLOW)⚠ pnpm not found. Install from https://pnpm.io$(NC)"
+
 check-bun:
-	@command -v bun >/dev/null 2>&1 && echo "$(GREEN)✓ bun is installed$(NC)" || echo "$(YELLOW)⚠ bun not found. Install from https://bun.sh$(NC)"
+	@command -v bun >/dev/null 2>&1 && echo "$(GREEN)✓ bun is installed ($(shell bun --version))$(NC)" || echo "$(YELLOW)⚠ bun not found. Install from https://bun.sh$(NC)"
 
 gen: check-bun
+	@if [ -z "$(SPEC)" ]; then \
+		echo "$(RED)✗ Error: SPEC not specified$(NC)"; \
+		echo "Usage: make gen SPEC=openapi.json"; \
+		exit 1; \
+	fi
 	@if command -v bun >/dev/null 2>&1; then \
 		echo "$(BLUE)Generating client with bun ($(SPEC))...$(NC)"; \
 		bun dist/cli.js $(SPEC); \
@@ -106,13 +124,13 @@ gen-node:
 		echo "Usage: make gen-node SPEC=openapi.json"; \
 		exit 1; \
 	fi
-	@echo "$(BLUE)Generating client with node ($(SPEC))...$(NC)"
-	@npm run build
+	@echo "$(BLUE)Generating client with node ($(SPEC)) using $(PKG_MANAGER)...$(NC)"
+	@$(PKG_MANAGER) run build
 	@node dist/cli.js $(SPEC)
 
 gen-example:
-	@echo "$(BLUE)Generating example client...$(NC)"
-	@npm run gen:example
+	@echo "$(BLUE)Generating example client (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) run gen:example
 
 # ============================================================================
 # CLI COMMANDS
@@ -130,7 +148,7 @@ cli: check-bun
 		bun dist/cli.js $(ARGS); \
 	else \
 		echo "$(YELLOW)bun not found, using node...$(NC)"; \
-		npm run build > /dev/null 2>&1; \
+		$(PKG_MANAGER) run build > /dev/null 2>&1; \
 		node dist/cli.js $(ARGS); \
 	fi
 
@@ -139,7 +157,7 @@ cli-help:
 	@if command -v bun >/dev/null 2>&1; then \
 		bun dist/cli.js --help; \
 	else \
-		npm run build > /dev/null 2>&1; \
+		$(PKG_MANAGER) run build > /dev/null 2>&1; \
 		node dist/cli.js --help; \
 	fi
 
@@ -147,7 +165,7 @@ cli-version:
 	@if command -v bun >/dev/null 2>&1; then \
 		bun dist/cli.js --version; \
 	else \
-		npm run build > /dev/null 2>&1; \
+		$(PKG_MANAGER) run build > /dev/null 2>&1; \
 		node dist/cli.js --version; \
 	fi
 
@@ -166,13 +184,16 @@ publish-check:
 	@echo "$(GREEN)Main Entry:$(NC)"
 	@grep '"main"' package.json
 	@echo ""
+	@echo "$(GREEN)Package Manager:$(NC)"
+	@grep '"packageManager"' package.json
+	@echo ""
 	@echo "$(GREEN)Bin Command:$(NC)"
 	@grep -A1 '"bin"' package.json
 
 publish-dry:
-	@echo "$(YELLOW)Running dry-run publish...$(NC)"
-	@npm run build
-	@npm run publish:dry
+	@echo "$(YELLOW)Running dry-run publish (using $(PKG_MANAGER))...$(NC)"
+	@$(PKG_MANAGER) run build
+	@$(PKG_MANAGER) run publish:dry
 
 publish: publish-check
 	@echo ""
@@ -181,8 +202,8 @@ publish: publish-check
 	@read -p "Are you sure you want to publish? (y/n) " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		echo "$(BLUE)Building and publishing...$(NC)"; \
-		npm run build; \
+		echo "$(BLUE)Building and publishing (using $(PKG_MANAGER))...$(NC)"; \
+		$(PKG_MANAGER) run build; \
 		npm publish; \
 		echo "$(GREEN)✓ Published successfully$(NC)"; \
 		echo ""; \
@@ -197,8 +218,8 @@ publish: publish-check
 # ============================================================================
 
 install:
-	@echo "$(BLUE)Installing dependencies...$(NC)"
-	@npm install
+	@echo "$(BLUE)Installing dependencies using $(PKG_MANAGER)...$(NC)"
+	@$(PKG_MANAGER) install
 	@echo "$(GREEN)✓ Dependencies installed$(NC)"
 
 lint:
@@ -212,6 +233,9 @@ format:
 status:
 	@echo "$(BLUE)Project Status:$(NC)"
 	@echo ""
+	@echo "$(GREEN)Package Manager:$(NC)"
+	@echo "  $(PKG_MANAGER)"
+	@echo ""
 	@echo "$(GREEN)Git Status:$(NC)"
 	@git status --short || echo "Not a git repository"
 	@echo ""
@@ -219,13 +243,16 @@ status:
 	@grep '"version"' package.json | head -1
 	@echo ""
 	@echo "$(GREEN)Dependencies:$(NC)"
-	@npm list --depth=0 2>/dev/null | grep -E "ky|ts-jest|jest" || npm list --depth=0
+	@$(PKG_MANAGER) list --depth=0 2>/dev/null | grep -E "ky|ts-jest|jest" || $(PKG_MANAGER) list --depth=0
 	@echo ""
 	@echo "$(GREEN)Node Version:$(NC)"
 	@node --version
 	@echo ""
 	@echo "$(GREEN)npm Version:$(NC)"
 	@npm --version
+	@echo ""
+	@echo "$(GREEN)pnpm Version:$(NC)"
+	@pnpm --version 2>/dev/null || echo "Not installed"
 
 # ============================================================================
 # DEVELOPMENT WORKFLOWS
@@ -242,11 +269,5 @@ all: build test gen-example
 	@echo "$(GREEN)✓ All tasks completed$(NC)"
 
 watch: dev
-
-.PHONY: setup rebuild all watch help
-
-# ============================================================================
-# DEFAULT TARGET
-# ============================================================================
 
 .DEFAULT_GOAL := help
