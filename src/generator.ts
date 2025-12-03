@@ -167,18 +167,19 @@ ${fields}
 
     // Use a Map to track generated method names and avoid duplicates
     const generatedMethods = new Map<string, boolean>();
-    const methods = this.endpoints
-      .map((endpoint) => {
-        const methodName = this.getCamelCaseName(endpoint.operationId);
-        // Skip if this method name has already been generated
-        if (generatedMethods.has(methodName)) {
-          return null;
-        }
-        // Mark this method name as generated
-        generatedMethods.set(methodName, true);
-        return this.generateMethod(endpoint);
-      })
-      .filter(Boolean)
+    const uniqueEndpoints = this.endpoints.filter((endpoint) => {
+      const methodName = this.getCamelCaseName(endpoint.operationId);
+      // Skip if this method name has already been generated
+      if (generatedMethods.has(methodName)) {
+        return false;
+      }
+      // Mark this method name as generated
+      generatedMethods.set(methodName, true);
+      return true;
+    });
+
+    const methods = uniqueEndpoints
+      .map((endpoint) => this.generateMethod(endpoint))
       .join('\n\n');
 
     const exportStatement = this.config.exportAsDefault
