@@ -52,13 +52,15 @@ help:
 	@echo "  make lint               - Run linter (if configured)"
 	@echo "  make format             - Format code (if configured)"
 	@echo "  make status             - Show git status and version"
-	@echo "  make version-update VERSION=<new-version> - Update package version"
+	@echo "  make version-update     - Update package version (VERSION or BUMP parameter)"
 	@echo ""
 	@echo "$(YELLOW)Examples:$(NC)"
 	@echo "  make gen SPEC=openapi.json"
 	@echo "  make gen SPEC=openapi.json --output client.ts --baseUrl https://api.example.com"
 	@echo "  make cli ARGS=\"--help\""
 	@echo "  make gen-example && make test"
+	@echo "  make version-update BUMP=minor"
+	@echo "  make version-update VERSION=2.0.0"
 	@echo ""
 
 # ============================================================================
@@ -256,13 +258,17 @@ status:
 	@pnpm --version 2>/dev/null || echo "Not installed"
 
 version-update:
-	@if [ -z "$(VERSION)" ]; then \
-		echo "$(RED)✗ Error: VERSION not specified$(NC)"; \
-		echo "Usage: make version-update VERSION=<new-version>"; \
+	@if [ -z "$(VERSION)" ] && [ -z "$(BUMP)" ]; then \
+		echo "$(RED)✗ Error: VERSION or BUMP not specified$(NC)"; \
+		echo ""; \
+		echo "Usage 1: make version-update VERSION=<new-version>"; \
+		echo "Usage 2: make version-update BUMP=<major|minor|patch>"; \
 		echo ""; \
 		echo "$(YELLOW)Examples:$(NC)"; \
-		echo "  make version-update VERSION=1.1.0"; \
 		echo "  make version-update VERSION=2.0.0"; \
+		echo "  make version-update BUMP=major    # e.g., 1.0.2 → 2.0.0"; \
+		echo "  make version-update BUMP=minor    # e.g., 1.0.2 → 1.1.0"; \
+		echo "  make version-update BUMP=patch    # e.g., 1.0.2 → 1.0.3"; \
 		exit 1; \
 	fi
 	@echo "$(BLUE)Updating package version...$(NC)"
@@ -270,12 +276,29 @@ version-update:
 	@echo "$(GREEN)Current version:$(NC)"
 	@grep '"version"' package.json | head -1 | sed 's/^[[:space:]]*//'
 	@echo ""
-	@echo "$(BLUE)Setting version to: $(VERSION)$(NC)"
-	@if command -v jq >/dev/null 2>&1; then \
-		jq '.version = "$(VERSION)"' package.json > package.json.tmp && mv package.json.tmp package.json; \
-	else \
-		sed -i.bak 's/"version": "[^"]*"/"version": "$(VERSION)"/' package.json && rm -f package.json.bak; \
-	fi
+	@bash -c ' \
+		if [ -n "$(BUMP)" ]; then \
+			CURRENT_VERSION=$$(grep "\"version\"" package.json | head -1 | sed -E "s/.*\"([0-9.]+)\".*/\1/"); \
+			MAJOR=$$(echo $$CURRENT_VERSION | cut -d. -f1); \
+			MINOR=$$(echo $$CURRENT_VERSION | cut -d. -f2); \
+			PATCH=$$(echo $$CURRENT_VERSION | cut -d. -f3); \
+			case "$(BUMP)" in \
+				major) NEW_VERSION="$$((MAJOR + 1)).0.0" ;; \
+				minor) NEW_VERSION="$$MAJOR.$$((MINOR + 1)).0" ;; \
+				patch) NEW_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))" ;; \
+				*) echo "$(RED)✗ Error: BUMP must be major, minor, or patch$(NC)"; exit 1 ;; \
+			esac; \
+			echo "$(BLUE)Bumping $(BUMP) version to: $$NEW_VERSION$(NC)"; \
+		else \
+			NEW_VERSION="$(VERSION)"; \
+			echo "$(BLUE)Setting version to: $$NEW_VERSION$(NC)"; \
+		fi; \
+		if command -v jq >/dev/null 2>&1; then \
+			jq --arg version "$$NEW_VERSION" ".version = \$$version" package.json > package.json.tmp && mv package.json.tmp package.json; \
+		else \
+			sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$$NEW_VERSION\"/" package.json && rm -f package.json.bak; \
+		fi \
+	'
 	@echo ""
 	@echo "$(GREEN)New version:$(NC)"
 	@grep '"version"' package.json | head -1 | sed 's/^[[:space:]]*//'
