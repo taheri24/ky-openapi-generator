@@ -52,6 +52,7 @@ log_info "Starting npm publish process for ky-openapi-generator"
 # Parse command line arguments
 DRY_RUN=false
 SKIP_TESTS=false
+BUMP="patch"  # Default version bump
 
 for arg in "$@"; do
   case $arg in
@@ -63,9 +64,22 @@ for arg in "$@"; do
       SKIP_TESTS=true
       log_warn "Skipping build verification"
       ;;
+    BUMP=*)
+      BUMP="${arg#BUMP=}"
+      if ! echo "$BUMP" | grep -qE "^(major|minor|patch)$"; then
+        log_error "Invalid BUMP value: $BUMP (must be major, minor, or patch)"
+        exit 1
+      fi
+      ;;
     *)
       log_error "Unknown argument: $arg"
-      echo "Usage: ./publish.sh [--dry-run] [--skip-tests]"
+      echo "Usage: ./publish.sh [BUMP=major|minor|patch] [--dry-run] [--skip-tests]"
+      echo ""
+      echo "Examples:"
+      echo "  ./publish.sh                    # Bump patch version (1.0.2 → 1.0.3)"
+      echo "  ./publish.sh BUMP=minor         # Bump minor version (1.0.2 → 1.1.0)"
+      echo "  ./publish.sh BUMP=major         # Bump major version (1.0.2 → 2.0.0)"
+      echo "  ./publish.sh BUMP=patch --dry-run  # Dry-run with patch bump"
       exit 1
       ;;
   esac
@@ -74,6 +88,16 @@ done
 # Get current version
 CURRENT_VERSION=$(grep '"version"' package.json | head -1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
 log_info "Current version: ${CURRENT_VERSION}"
+
+# Bump version before checking git status
+log_info "Preparing to bump version..."
+if make version-update BUMP="$BUMP" > /dev/null 2>&1; then
+  NEW_VERSION=$(grep '"version"' package.json | head -1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
+  log_success "Version bumped: ${CURRENT_VERSION} → ${NEW_VERSION}"
+else
+  log_error "Failed to bump version"
+  exit 1
+fi
 
 # Check git status
 if [ -n "$(git status --porcelain)" ]; then
@@ -128,17 +152,18 @@ fi
 
 # Perform actual publish
 if [ "$DRY_RUN" = true ]; then
-  log_success "DRY-RUN COMPLETED - No changes were published"
+  log_success "DRY-RUN COMPLETED"
+  log_info "Would publish version ${NEW_VERSION} to npmjs"
   exit 0
 fi
 
 log_info "Publishing to npmjs..."
 if npm publish; then
-  log_success "Successfully published version ${CURRENT_VERSION} to npmjs!"
+  log_success "Successfully published version ${NEW_VERSION} to npmjs!"
   echo ""
   log_info "Package details:"
   echo "  Name: $(grep '"name"' package.json | head -1 | sed 's/.*"name": "\([^"]*\)".*/\1/')"
-  echo "  Version: ${CURRENT_VERSION}"
+  echo "  Version: ${NEW_VERSION}"
   echo "  URL: https://www.npmjs.com/package/$(grep '"name"' package.json | head -1 | sed 's/.*"name": "\([^"]*\)".*/\1/')"
   echo ""
   log_success "Publishing completed!"
