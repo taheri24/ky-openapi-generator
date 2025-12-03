@@ -12,10 +12,13 @@
     "build": "tsc && npm run build:fix-esm",
     "build:fix-esm": "node scripts/fix-esm-imports.js",
     "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "gen:example": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
     "gen:example:build": "npm run build && node dist/cli.js example/petstore.openapi.json --output example/generated",
     "prepublishOnly": "npm run build",
-    "publish:dry": "npm publish --dry-run" 
+    "publish:dry": "npm publish --dry-run"
   },
   "keywords": [
     "openapi",
@@ -46,7 +49,10 @@
     "ky": "^1.2.3"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.19.25",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
