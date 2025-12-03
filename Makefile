@@ -1,4 +1,4 @@
-.PHONY: help build dev test test-watch test-coverage clean gen gen-example install check-bun check-pnpm publish publish-dry lint format setup rebuild all watch
+.PHONY: help build dev test test-watch test-coverage clean gen gen-example install check-bun check-pnpm publish publish-dry lint format setup rebuild all watch version-update
 
 # Detect package manager (pnpm preferred, fallback to npm)
 ifeq ($(shell command -v pnpm 2> /dev/null),)
@@ -52,6 +52,7 @@ help:
 	@echo "  make lint               - Run linter (if configured)"
 	@echo "  make format             - Format code (if configured)"
 	@echo "  make status             - Show git status and version"
+	@echo "  make version-update VERSION=<new-version> - Update package version"
 	@echo ""
 	@echo "$(YELLOW)Examples:$(NC)"
 	@echo "  make gen SPEC=openapi.json"
@@ -253,6 +254,33 @@ status:
 	@echo ""
 	@echo "$(GREEN)pnpm Version:$(NC)"
 	@pnpm --version 2>/dev/null || echo "Not installed"
+
+version-update:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "$(RED)✗ Error: VERSION not specified$(NC)"; \
+		echo "Usage: make version-update VERSION=<new-version>"; \
+		echo ""; \
+		echo "$(YELLOW)Examples:$(NC)"; \
+		echo "  make version-update VERSION=1.1.0"; \
+		echo "  make version-update VERSION=2.0.0"; \
+		exit 1; \
+	fi
+	@echo "$(BLUE)Updating package version...$(NC)"
+	@echo ""
+	@echo "$(GREEN)Current version:$(NC)"
+	@grep '"version"' package.json | head -1 | sed 's/^[[:space:]]*//'
+	@echo ""
+	@echo "$(BLUE)Setting version to: $(VERSION)$(NC)"
+	@if command -v jq >/dev/null 2>&1; then \
+		jq '.version = "$(VERSION)"' package.json > package.json.tmp && mv package.json.tmp package.json; \
+	else \
+		sed -i.bak 's/"version": "[^"]*"/"version": "$(VERSION)"/' package.json && rm -f package.json.bak; \
+	fi
+	@echo ""
+	@echo "$(GREEN)New version:$(NC)"
+	@grep '"version"' package.json | head -1 | sed 's/^[[:space:]]*//'
+	@echo ""
+	@echo "$(GREEN)✓ Version updated successfully$(NC)"
 
 # ============================================================================
 # DEVELOPMENT WORKFLOWS
