@@ -21,39 +21,97 @@ export interface GetPostsQuery {
   author_id?: string;
 }
 
-export type GetPostsResponse = BlogPost[];
+export type GetPostsResponse = {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  status?: 'draft' | 'published' | 'archived';
+  tags?: string[];
+  created_at?: string;
+  updated_at?: string;
+}[];
 
-export type PostPostsRequest = CreatePostRequest;
+export type PostPostsRequest = {
+  title: string;
+  content: string;
+  tags?: string[];
+};
 
-export type PostPostsResponse = BlogPost;
+export type PostPostsResponse = {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  status?: 'draft' | 'published' | 'archived';
+  tags?: string[];
+  created_at?: string;
+  updated_at?: string;
+};
 
 export interface GetPostsPostIdParams {
   post_id: string;
 }
 
-export type GetPostsPostIdResponse = BlogPost;
+export type GetPostsPostIdResponse = {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  status?: 'draft' | 'published' | 'archived';
+  tags?: string[];
+  created_at?: string;
+  updated_at?: string;
+};
 
-export type PutPostsRequest = UpdatePostRequest;
+export type PutPostsRequest = {
+  title?: string;
+  content?: string;
+  status?: 'draft' | 'published' | 'archived';
+};
 
 export interface PutPostsParams {
   post_id: string;
 }
 
-export type PutPostsResponse = BlogPost;
+export type PutPostsResponse = {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  status?: 'draft' | 'published' | 'archived';
+  tags?: string[];
+  created_at?: string;
+  updated_at?: string;
+};
 
 export interface GetPostsCommentsParams {
   post_id: string;
 }
 
-export type GetPostsCommentsResponse = Comment[];
+export type GetPostsCommentsResponse = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  created_at?: string;
+}[];
 
-export type PostPostsCommentsRequest = CreateCommentRequest;
+export type PostPostsCommentsRequest = {
+  content: string;
+};
 
 export interface PostPostsCommentsParams {
   post_id: string;
 }
 
-export type PostPostsCommentsResponse = Comment;
+export type PostPostsCommentsResponse = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  created_at?: string;
+};
 
 
 export interface RequestOptions {
