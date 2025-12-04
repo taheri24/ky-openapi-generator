@@ -155,11 +155,7 @@ ${fields}
     const successResponse = endpoint.responses['200'] || endpoint.responses['201'] || Object.values(endpoint.responses)[0];
     const type = successResponse?.type || 'any';
 
-    return `export interface ${typeName} {
-  data: ${type};
-  status: number;
-  headers: Record<string, any>;
-}`;
+    return `export type ${typeName} = ${type};`;
   }
 
   private generateClient(): string {
@@ -194,12 +190,10 @@ ${fields}
     }
 
     return `export class ${clientName} {
-${checksumField}  private baseUrl: string;
-  private ky: typeof ky;
+${checksumField}  private ky: typeof ky;
 
-  constructor(baseUrl: string = '${this.config.baseUrl}') {
-    this.baseUrl = baseUrl;
-    this.ky = ky.create({ prefixUrl: baseUrl });
+  constructor(prefixUrl: string = '${this.config.baseUrl}') {
+    this.ky = ky.create({ prefixUrl });
   }
 
 ${methods}
@@ -212,7 +206,6 @@ ${exportStatement}`;
     const methodName = this.getCamelCaseName(endpoint.operationId);
     const queryParams = endpoint.parameters.filter((p) => p.in === 'query');
     const pathParams = endpoint.parameters.filter((p) => p.in === 'path');
-    const headerParams = endpoint.parameters.filter((p) => p.in === 'header');
 
     // Build parameter list
     const paramParts: string[] = [];
@@ -228,11 +221,11 @@ ${exportStatement}`;
     paramParts.push(`options?: RequestOptions`);
 
     const paramSignature = paramParts.join(', ');
-    const returnType = this.getTypeName(endpoint, 'Response');
+    const responseType = this.getTypeName(endpoint, 'Response');
 
     // Build method body
     const lines: string[] = [];
-    lines.push(`  async ${methodName}(${paramSignature}): Promise<${returnType}> {`);
+    lines.push(`  async ${methodName}(${paramSignature}): Promise<${responseType}> {`);
 
     // Build path with path parameters
     let path = endpoint.path;
@@ -245,44 +238,28 @@ ${exportStatement}`;
       lines.push(`    const url = '${endpoint.path}';`);
     }
 
-    // Build request options
-    const requestOptions: string[] = ['...options'];
-    if (queryParams.length > 0 || headerParams.length > 0) {
-      requestOptions.push('searchParams: query');
-    }
-    if (headerParams.length > 0) {
-      requestOptions.push('headers: { ...options?.headers, ...headers }');
-    }
-
     const methodLower = endpoint.method.toLowerCase();
     const kyMethod = ['get', 'post', 'put', 'patch', 'delete'].includes(methodLower)
       ? methodLower
       : 'get';
 
     if (endpoint.requestBody) {
-      lines.push(`    const response = await this.ky.${kyMethod}(url, {`);
+      lines.push(`    return await this.ky.${kyMethod}(url, {`);
       lines.push(`      json: body,`);
-      requestOptions.forEach((opt) => {
-        if (opt !== 'searchParams: query' && opt !== '...options') {
-          lines.push(`      ${opt},`);
-        }
-      });
-      lines.push(`      ...options,`);
-      lines.push(`    }).json<any>();`);
-    } else {
-      lines.push(`    const response = await this.ky.${kyMethod}(url, {`);
       if (queryParams.length > 0) {
         lines.push(`      searchParams: query,`);
       }
       lines.push(`      ...options,`);
-      lines.push(`    }).json<any>();`);
+      lines.push(`    }).json<${responseType}>();`);
+    } else {
+      lines.push(`    return await this.ky.${kyMethod}(url, {`);
+      if (queryParams.length > 0) {
+        lines.push(`      searchParams: query,`);
+      }
+      lines.push(`      ...options,`);
+      lines.push(`    }).json<${responseType}>();`);
     }
 
-    lines.push(`    return {`);
-    lines.push(`      data: response,`);
-    lines.push(`      status: 200,`);
-    lines.push(`      headers: {},`);
-    lines.push(`    };`);
     lines.push(`  }`);
 
     return lines.join('\n');
