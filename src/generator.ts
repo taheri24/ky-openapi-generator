@@ -172,8 +172,7 @@ ${fields}
   private generateResponseType(endpoint: ParsedEndpoint): string {
     const typeName = this.getTypeName(endpoint, 'Response');
     const successResponse = endpoint.responses['200'] || endpoint.responses['201'] || Object.values(endpoint.responses)[0];
-    // Use 'void' for responses without a defined schema instead of 'any'
-    const type = successResponse?.type || 'void';
+    const type = successResponse?.type || 'any';
 
     return `export type ${typeName} = ${type};`;
   }

@@ -203,11 +203,11 @@ export class OpenAPIParser {
 
   private parseResponses(responses: Record<string, any>): Record<string, ParsedResponse> {
     const parsed: Record<string, ParsedResponse> = {};
+    console.log(responses);
 
     Object.entries(responses).forEach(([status, response]) => {
-      const jsonContent = response.content?.['application/json'];
+      const jsonContent = response.content?.['application/json'] || response;
       const type = jsonContent ? this.resolveSchemaType(jsonContent.schema) : undefined;
-
       parsed[status] = {
         status,
         type,
@@ -219,12 +219,12 @@ export class OpenAPIParser {
   }
 
   private resolveSchemaType(schema?: any): string {
-    if (!schema) return 'void';
+    if (!schema) return 'any';
 
     // Handle $ref references
     if (schema.$ref) {
       const refName = schema.$ref.split('/').pop();
-      return refName || 'void';
+      return refName || 'any';
     }
 
     // Handle direct types
@@ -259,7 +259,7 @@ export class OpenAPIParser {
       return 'boolean';
     }
 
-    return schema.type || 'void';
+    return schema.type || 'any';
   }
 
   private generateObjectType(schema: any): string {
