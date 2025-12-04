@@ -1,0 +1,79 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Analytics API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://analytics.example.com" }],
+  "paths": {
+    "/events": {
+      "post": {
+        "summary": "Track event",
+        "tags": ["events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventRequest" }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "summary": "Get analytics report",
+        "tags": ["reports"],
+        "parameters": [
+          { "name": "start_date", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } },
+          { "name": "end_date", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } },
+          { "name": "metrics", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics report",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AnalyticsReport" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EventRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "properties": { "type": "object", "additionalProperties": true },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AnalyticsReport": {
+        "type": "object",
+        "properties": {
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": "string", "format": "date" },
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/MetricData" } }
+        }
+      },
+      "MetricData": {
+        "type": "object",
+        "properties": {
+          "metric_name": { "type": "string" },
+          "values": { "type": "array", "items": { "type": "number" } },
+          "total": { "type": "number" }
+        }
+      }
+    }
+  }
+}

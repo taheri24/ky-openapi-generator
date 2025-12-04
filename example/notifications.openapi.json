@@ -1,0 +1,101 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Notifications API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://notifications.example.com" }],
+  "paths": {
+    "/notifications": {
+      "get": {
+        "summary": "List notifications",
+        "tags": ["notifications"],
+        "parameters": [
+          { "name": "unread_only", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["email", "sms", "push", "in_app"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Notification" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Send notification",
+        "tags": ["notifications"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendNotificationRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Notification sent",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Notification" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/{notification_id}/mark-as-read": {
+      "post": {
+        "summary": "Mark notification as read",
+        "tags": ["notifications"],
+        "parameters": [
+          { "name": "notification_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked as read",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Notification" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "type": { "type": "string", "enum": ["email", "sms", "push", "in_app"] },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "read": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SendNotificationRequest": {
+        "type": "object",
+        "required": ["user_id", "type", "message"],
+        "properties": {
+          "user_id": { "type": "string" },
+          "type": { "type": "string", "enum": ["email", "sms", "push", "in_app"] },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": true }
+        }
+      }
+    }
+  }
+}
