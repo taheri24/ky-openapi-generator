@@ -16,17 +16,38 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type GetFilesResponse = FileInfo[];
+export type GetFilesResponse = {
+  id?: string;
+  name?: string;
+  size?: number;
+  mime_type?: string;
+  created_at?: string;
+  url?: string;
+}[];
 
 export type PostFilesRequest = any;
 
-export type PostFilesResponse = FileInfo;
+export type PostFilesResponse = {
+  id?: string;
+  name?: string;
+  size?: number;
+  mime_type?: string;
+  created_at?: string;
+  url?: string;
+};
 
 export interface GetFilesFileIdParams {
   file_id: string;
 }
 
-export type GetFilesFileIdResponse = FileInfo;
+export type GetFilesFileIdResponse = {
+  id?: string;
+  name?: string;
+  size?: number;
+  mime_type?: string;
+  created_at?: string;
+  url?: string;
+};
 
 export interface DeleteFilesParams {
   file_id: string;

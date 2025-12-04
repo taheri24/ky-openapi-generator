@@ -16,17 +16,45 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type PostRegisterRequest = RegisterRequest;
+export type PostRegisterRequest = {
+  email: string;
+  password: string;
+  name?: string;
+};
 
-export type PostRegisterResponse = AuthResponse;
+export type PostRegisterResponse = {
+  user?: {
+  id?: string;
+  email?: string;
+  name?: string;
+};
+  access_token?: string;
+  refresh_token?: string;
+};
 
-export type PostLoginRequest = LoginRequest;
+export type PostLoginRequest = {
+  email: string;
+  password: string;
+};
 
-export type PostLoginResponse = AuthResponse;
+export type PostLoginResponse = {
+  user?: {
+  id?: string;
+  email?: string;
+  name?: string;
+};
+  access_token?: string;
+  refresh_token?: string;
+};
 
-export type PostRefreshRequest = RefreshTokenRequest;
+export type PostRefreshRequest = {
+  refresh_token: string;
+};
 
-export type PostRefreshResponse = TokenResponse;
+export type PostRefreshResponse = {
+  access_token?: string;
+  token_type?: string;
+};
 
 
 export interface RequestOptions {

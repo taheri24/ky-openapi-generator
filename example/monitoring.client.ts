@@ -16,15 +16,35 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type GetHealthResponse = HealthStatus;
+export type GetHealthResponse = {
+  status?: 'healthy' | 'degraded' | 'unhealthy';
+  services?: {
+  name?: string;
+  status?: 'up' | 'down' | 'degraded';
+  response_time_ms?: number;
+}[];
+  timestamp?: string;
+};
 
 export interface GetMetricsQuery {
   type?: 'cpu' | 'memory' | 'disk' | 'network';
 }
 
-export type GetMetricsResponse = Metric[];
+export type GetMetricsResponse = {
+  name?: string;
+  type?: string;
+  value?: number;
+  unit?: string;
+  timestamp?: string;
+}[];
 
-export type GetAlertsResponse = Alert[];
+export type GetAlertsResponse = {
+  id?: string;
+  severity?: 'info' | 'warning' | 'critical';
+  title?: string;
+  message?: string;
+  created_at?: string;
+}[];
 
 
 export interface RequestOptions {

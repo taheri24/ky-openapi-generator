@@ -16,7 +16,11 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type PostEventsRequest = EventRequest;
+export type PostEventsRequest = {
+  name: string;
+  properties?: Record<string, any>;
+  timestamp?: string;
+};
 
 export type PostEventsResponse = any;
 
@@ -26,7 +30,15 @@ export interface GetReportsQuery {
   metrics?: string[];
 }
 
-export type GetReportsResponse = AnalyticsReport;
+export type GetReportsResponse = {
+  start_date?: string;
+  end_date?: string;
+  data?: {
+  metric_name?: string;
+  values?: number[];
+  total?: number;
+}[];
+};
 
 
 export interface RequestOptions {

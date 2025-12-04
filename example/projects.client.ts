@@ -20,37 +20,86 @@ export interface GetProjectsQuery {
   status?: 'active' | 'completed' | 'archived';
 }
 
-export type GetProjectsResponse = Project[];
+export type GetProjectsResponse = {
+  id?: string;
+  name?: string;
+  description?: string;
+  status?: 'active' | 'completed' | 'archived';
+  owner_id?: string;
+  created_at?: string;
+}[];
 
-export type PostProjectsRequest = CreateProjectRequest;
+export type PostProjectsRequest = {
+  name: string;
+  description?: string;
+  team_members?: string[];
+};
 
-export type PostProjectsResponse = Project;
+export type PostProjectsResponse = {
+  id?: string;
+  name?: string;
+  description?: string;
+  status?: 'active' | 'completed' | 'archived';
+  owner_id?: string;
+  created_at?: string;
+};
 
 export interface GetProjectsProjectIdParams {
   project_id: string;
 }
 
-export type GetProjectsProjectIdResponse = ProjectDetail;
+export type GetProjectsProjectIdResponse = Record<string, any>;
 
 export interface GetProjectsTasksParams {
   project_id: string;
 }
 
-export type GetProjectsTasksResponse = Task[];
+export type GetProjectsTasksResponse = {
+  id?: string;
+  project_id?: string;
+  title?: string;
+  description?: string;
+  status?: 'todo' | 'in_progress' | 'done';
+  assigned_to?: string;
+  due_date?: string;
+  priority?: 'low' | 'medium' | 'high';
+  created_at?: string;
+}[];
 
-export type PostProjectsTasksRequest = CreateTaskRequest;
+export type PostProjectsTasksRequest = {
+  title: string;
+  description?: string;
+  assigned_to?: string;
+  due_date?: string;
+  priority?: 'low' | 'medium' | 'high';
+};
 
 export interface PostProjectsTasksParams {
   project_id: string;
 }
 
-export type PostProjectsTasksResponse = Task;
+export type PostProjectsTasksResponse = {
+  id?: string;
+  project_id?: string;
+  title?: string;
+  description?: string;
+  status?: 'todo' | 'in_progress' | 'done';
+  assigned_to?: string;
+  due_date?: string;
+  priority?: 'low' | 'medium' | 'high';
+  created_at?: string;
+};
 
 export interface GetTasksSubtasksParams {
   task_id: string;
 }
 
-export type GetTasksSubtasksResponse = SubTask[];
+export type GetTasksSubtasksResponse = {
+  id?: string;
+  task_id?: string;
+  title?: string;
+  completed?: boolean;
+}[];
 
 
 export interface RequestOptions {

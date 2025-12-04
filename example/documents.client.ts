@@ -21,19 +21,54 @@ export interface GetDocumentsQuery {
   type?: 'pdf' | 'docx' | 'txt' | 'xlsx';
 }
 
-export type GetDocumentsResponse = Document[];
+export type GetDocumentsResponse = {
+  id?: string;
+  title?: string;
+  type?: 'pdf' | 'docx' | 'txt' | 'xlsx';
+  size?: number;
+  owner_id?: string;
+  folder_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}[];
 
-export type PostDocumentsRequest = CreateDocumentRequest;
+export type PostDocumentsRequest = {
+  title: string;
+  type: 'pdf' | 'docx' | 'txt' | 'xlsx';
+  folder_id?: string;
+  content?: string;
+};
 
-export type PostDocumentsResponse = Document;
+export type PostDocumentsResponse = {
+  id?: string;
+  title?: string;
+  type?: 'pdf' | 'docx' | 'txt' | 'xlsx';
+  size?: number;
+  owner_id?: string;
+  folder_id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
 
 export interface GetDocumentsDocumentIdParams {
   document_id: string;
 }
 
-export type GetDocumentsDocumentIdResponse = Document;
+export type GetDocumentsDocumentIdResponse = {
+  id?: string;
+  title?: string;
+  type?: 'pdf' | 'docx' | 'txt' | 'xlsx';
+  size?: number;
+  owner_id?: string;
+  folder_id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
 
-export type PostDocumentsShareRequest = ShareDocumentRequest;
+export type PostDocumentsShareRequest = {
+  user_ids: string[];
+  permission?: 'view' | 'edit' | 'admin';
+};
 
 export interface PostDocumentsShareParams {
   document_id: string;

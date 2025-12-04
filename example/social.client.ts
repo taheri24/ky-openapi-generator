@@ -20,23 +20,56 @@ export interface GetUsersProfileParams {
   username: string;
 }
 
-export type GetUsersProfileResponse = UserProfile;
+export type GetUsersProfileResponse = {
+  user_id?: string;
+  username?: string;
+  display_name?: string;
+  bio?: string;
+  followers_count?: number;
+  following_count?: number;
+  posts_count?: number;
+  profile_image_url?: string;
+};
 
 export interface GetPostsQuery {
   filter?: 'recent' | 'trending' | 'following';
 }
 
-export type GetPostsResponse = Post[];
+export type GetPostsResponse = {
+  id?: string;
+  author_id?: string;
+  content?: string;
+  likes_count?: number;
+  comments_count?: number;
+  created_at?: string;
+}[];
 
-export type PostPostsRequest = CreatePostRequest;
+export type PostPostsRequest = {
+  content: string;
+  image_urls?: string[];
+};
 
-export type PostPostsResponse = Post;
+export type PostPostsResponse = {
+  id?: string;
+  author_id?: string;
+  content?: string;
+  likes_count?: number;
+  comments_count?: number;
+  created_at?: string;
+};
 
 export interface PostPostsLikeParams {
   post_id: string;
 }
 
-export type PostPostsLikeResponse = Post;
+export type PostPostsLikeResponse = {
+  id?: string;
+  author_id?: string;
+  content?: string;
+  likes_count?: number;
+  comments_count?: number;
+  created_at?: string;
+};
 
 export interface PostUsersFollowParams {
   username: string;

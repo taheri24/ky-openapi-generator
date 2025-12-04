@@ -21,17 +21,47 @@ export interface GetNotificationsQuery {
   type?: 'email' | 'sms' | 'push' | 'in_app';
 }
 
-export type GetNotificationsResponse = Notification[];
+export type GetNotificationsResponse = {
+  id?: string;
+  user_id?: string;
+  type?: 'email' | 'sms' | 'push' | 'in_app';
+  title?: string;
+  message?: string;
+  read?: boolean;
+  created_at?: string;
+}[];
 
-export type PostNotificationsRequest = SendNotificationRequest;
+export type PostNotificationsRequest = {
+  user_id: string;
+  type: 'email' | 'sms' | 'push' | 'in_app';
+  title?: string;
+  message: string;
+  data?: Record<string, any>;
+};
 
-export type PostNotificationsResponse = Notification;
+export type PostNotificationsResponse = {
+  id?: string;
+  user_id?: string;
+  type?: 'email' | 'sms' | 'push' | 'in_app';
+  title?: string;
+  message?: string;
+  read?: boolean;
+  created_at?: string;
+};
 
 export interface PostNotificationsMarkAsReadParams {
   notification_id: string;
 }
 
-export type PostNotificationsMarkAsReadResponse = Notification;
+export type PostNotificationsMarkAsReadResponse = {
+  id?: string;
+  user_id?: string;
+  type?: 'email' | 'sms' | 'push' | 'in_app';
+  title?: string;
+  message?: string;
+  read?: boolean;
+  created_at?: string;
+};
 
 
 export interface RequestOptions {

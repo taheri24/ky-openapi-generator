@@ -16,25 +16,60 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type GetTodosResponse = Todo[];
+export type GetTodosResponse = {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  created_at?: string;
+  updated_at?: string;
+}[];
 
-export type PostTodosRequest = CreateTodoRequest;
+export type PostTodosRequest = {
+  title: string;
+  description?: string;
+};
 
-export type PostTodosResponse = Todo;
+export type PostTodosResponse = {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
 
 export interface GetTodosIdParams {
   id: string;
 }
 
-export type GetTodosIdResponse = Todo;
+export type GetTodosIdResponse = {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
 
-export type PutTodosRequest = UpdateTodoRequest;
+export type PutTodosRequest = {
+  title?: string;
+  description?: string;
+  completed?: boolean;
+};
 
 export interface PutTodosParams {
   id: string;
 }
 
-export type PutTodosResponse = Todo;
+export type PutTodosResponse = {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
 
 export interface DeleteTodosParams {
   id: string;

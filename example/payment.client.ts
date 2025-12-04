@@ -16,19 +16,47 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type PostPaymentsRequest = CreatePaymentRequest;
+export type PostPaymentsRequest = {
+  amount: number;
+  currency: 'USD' | 'EUR' | 'GBP';
+  payment_method_id: string;
+  description?: string;
+  metadata?: Record<string, any>;
+};
 
-export type PostPaymentsResponse = Payment;
+export type PostPaymentsResponse = {
+  id?: string;
+  amount?: number;
+  currency?: string;
+  status?: 'pending' | 'completed' | 'failed' | 'refunded';
+  created_at?: string;
+};
 
 export interface GetPaymentsParams {
   payment_id: string;
 }
 
-export type GetPaymentsResponse = Payment;
+export type GetPaymentsResponse = {
+  id?: string;
+  amount?: number;
+  currency?: string;
+  status?: 'pending' | 'completed' | 'failed' | 'refunded';
+  created_at?: string;
+};
 
-export type PostRefundsRequest = CreateRefundRequest;
+export type PostRefundsRequest = {
+  payment_id: string;
+  amount?: number;
+  reason?: string;
+};
 
-export type PostRefundsResponse = Refund;
+export type PostRefundsResponse = {
+  id?: string;
+  payment_id?: string;
+  amount?: number;
+  status?: string;
+  created_at?: string;
+};
 
 
 export interface RequestOptions {
