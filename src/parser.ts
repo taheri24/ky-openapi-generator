@@ -218,13 +218,31 @@ export class OpenAPIParser {
     return parsed;
   }
 
+  private normalizeName(name: string): string {
+    // Remove special characters and convert to Pascal case
+    const cleaned = name
+      .replace(/[^a-zA-Z0-9]/g, ' ') // Replace special chars with spaces
+      .split(/\s+/) // Split by spaces
+      .filter((part) => part.length > 0) // Filter empty parts
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()) // Pascal case each part
+      .join('');
+
+    // Ensure it doesn't start with a number
+    if (/^\d/.test(cleaned)) {
+      return '_' + cleaned;
+    }
+
+    return cleaned || 'Any';
+  }
+
   private resolveSchemaType(schema?: any): string {
     if (!schema) return 'any';
 
     // Handle $ref references
     if (schema.$ref) {
       const refName = schema.$ref.split('/').pop();
-      return refName || 'any';
+      const normalizedName = this.normalizeName(refName || 'Any');
+      return normalizedName;
     }
 
     // Handle direct types
