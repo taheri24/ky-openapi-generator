@@ -219,16 +219,23 @@ export class OpenAPIParser {
   }
 
   private resolveSchemaType(schema?: any): string {
-    if (!schema) return 'any';
+    if (!schema) return 'void';
 
     // Handle $ref references
     if (schema.$ref) {
       const refName = schema.$ref.split('/').pop();
-      return refName || 'any';
+      return refName || 'void';
     }
 
     // Handle direct types
     if (schema.type === 'object') {
+      // Try to parse object properties if available
+      if (schema.properties && Object.keys(schema.properties).length > 0) {
+        // Return a reference that indicates this is an object type
+        // The caller should generate a proper interface for this
+        return this.generateObjectType(schema);
+      }
+      // For generic objects without specific properties, use Record<string, any>
       return 'Record<string, any>';
     }
 
@@ -252,7 +259,23 @@ export class OpenAPIParser {
       return 'boolean';
     }
 
-    return schema.type || 'any';
+    return schema.type || 'void';
+  }
+
+  private generateObjectType(schema: any): string {
+    if (!schema.properties) {
+      return 'Record<string, any>';
+    }
+
+    const props = Object.entries(schema.properties)
+      .map(([name, prop]: [string, any]) => {
+        const required = schema.required?.includes(name);
+        const type = this.resolveSchemaType(prop);
+        return `  ${name}${required ? '' : '?'}: ${type};`;
+      })
+      .join('\n');
+
+    return `{\n${props}\n}`;
   }
 
   getBaseUrl(): string {

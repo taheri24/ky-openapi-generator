@@ -64,7 +64,23 @@ export class KyClientGenerator {
   }
 
   private generateImports(): string {
-    return `import ky from 'ky';\n`;
+    const utilities = `
+/**
+ * Converts query parameters to searchParams format
+ * Filters out undefined values to avoid encoding issues
+ */
+function convertSearchParams(params: Record<string, any> | undefined): Record<string, any> | undefined {
+  if (!params) return undefined;
+  const converted: Record<string, any> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null) {
+      converted[key] = value;
+    }
+  }
+  return Object.keys(converted).length > 0 ? converted : undefined;
+}
+`;
+    return `import ky from 'ky';\n${utilities}`;
   }
 
   private generateTypes(): string {
@@ -106,10 +122,13 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 
     const typeName = this.getTypeName(endpoint, 'Request');
     const type = endpoint.requestBody.type;
 
-    return `export interface ${typeName} {
-  // Request body for ${endpoint.method} ${endpoint.path}
-  [key: string]: any;
-}`;
+    // If type is a simple type or Record, use it directly
+    // Otherwise, create an interface that allows the type or undefined
+    if (type === 'Record<string, any>' || type.includes('object')) {
+      return `export type ${typeName} = ${type};`;
+    }
+
+    return `export type ${typeName} = ${type};`;
   }
 
   private generateQueryParamsType(endpoint: ParsedEndpoint): string {
@@ -153,7 +172,8 @@ ${fields}
   private generateResponseType(endpoint: ParsedEndpoint): string {
     const typeName = this.getTypeName(endpoint, 'Response');
     const successResponse = endpoint.responses['200'] || endpoint.responses['201'] || Object.values(endpoint.responses)[0];
-    const type = successResponse?.type || 'any';
+    // Use 'void' for responses without a defined schema instead of 'any'
+    const type = successResponse?.type || 'void';
 
     return `export type ${typeName} = ${type};`;
   }
@@ -243,22 +263,18 @@ ${exportStatement}`;
       ? methodLower
       : 'get';
 
+    const requestOptions: string[] = [];
     if (endpoint.requestBody) {
-      lines.push(`    return await this.ky.${kyMethod}(url, {`);
-      lines.push(`      json: body,`);
-      if (queryParams.length > 0) {
-        lines.push(`      searchParams: query,`);
-      }
-      lines.push(`      ...options,`);
-      lines.push(`    }).json<${responseType}>();`);
-    } else {
-      lines.push(`    return await this.ky.${kyMethod}(url, {`);
-      if (queryParams.length > 0) {
-        lines.push(`      searchParams: query,`);
-      }
-      lines.push(`      ...options,`);
-      lines.push(`    }).json<${responseType}>();`);
+      requestOptions.push(`      json: body,`);
     }
+    if (queryParams.length > 0) {
+      requestOptions.push(`      searchParams: convertSearchParams(query),`);
+    }
+    requestOptions.push(`      ...options,`);
+
+    lines.push(`    return await this.ky.${kyMethod}(url, {`);
+    lines.push(...requestOptions);
+    lines.push(`    }).json<${responseType}>();`);
 
     lines.push(`  }`);
 
