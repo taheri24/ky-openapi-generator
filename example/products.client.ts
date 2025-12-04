@@ -22,31 +22,98 @@ export interface GetProductsQuery {
   category_id?: string;
 }
 
-export type GetProductsResponse = ProductPage;
+export type GetProductsResponse = {
+  items?: {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category_id?: string;
+  inventory?: {
+  sku?: string;
+  quantity_in_stock?: number;
+  quantity_reserved?: number;
+};
+  tags?: string[];
+}[];
+  total?: number;
+  limit?: number;
+  offset?: number;
+};
 
-export type PostProductsRequest = CreateProductRequest;
+export type PostProductsRequest = {
+  name: string;
+  description?: string;
+  price: number;
+  category_id?: string;
+  tags?: string[];
+};
 
-export type PostProductsResponse = Product;
+export type PostProductsResponse = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category_id?: string;
+  inventory?: {
+  sku?: string;
+  quantity_in_stock?: number;
+  quantity_reserved?: number;
+};
+  tags?: string[];
+};
 
 export interface GetProductsProductIdParams {
   product_id: string;
 }
 
-export type GetProductsProductIdResponse = Product;
+export type GetProductsProductIdResponse = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category_id?: string;
+  inventory?: {
+  sku?: string;
+  quantity_in_stock?: number;
+  quantity_reserved?: number;
+};
+  tags?: string[];
+};
 
-export type PatchProductsRequest = UpdateProductRequest;
+export type PatchProductsRequest = {
+  name?: string;
+  description?: string;
+  price?: number;
+};
 
 export interface PatchProductsParams {
   product_id: string;
 }
 
-export type PatchProductsResponse = Product;
+export type PatchProductsResponse = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category_id?: string;
+  inventory?: {
+  sku?: string;
+  quantity_in_stock?: number;
+  quantity_reserved?: number;
+};
+  tags?: string[];
+};
 
 export interface GetProductsInventoryParams {
   product_id: string;
 }
 
-export type GetProductsInventoryResponse = InventoryData;
+export type GetProductsInventoryResponse = {
+  sku?: string;
+  quantity_in_stock?: number;
+  quantity_reserved?: number;
+};
 
 
 export interface RequestOptions {

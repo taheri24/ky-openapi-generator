@@ -4,6 +4,7 @@
 
 import { OpenAPISpec, ParsedEndpoint, ParsedParameter, ParsedResponse, Schema } from './types';
 import { suggestOperationID, SuggestionVerbosityLevel } from './operationIdSuggester';
+import { resolveRef, getRefName } from './refResolver';
 
 export class OpenAPIParser {
   private spec: OpenAPISpec;
@@ -203,7 +204,6 @@ export class OpenAPIParser {
 
   private parseResponses(responses: Record<string, any>): Record<string, ParsedResponse> {
     const parsed: Record<string, ParsedResponse> = {};
-    console.log(responses);
 
     Object.entries(responses).forEach(([status, response]) => {
       const jsonContent = response.content?.['application/json'] || response;
@@ -242,9 +242,21 @@ export class OpenAPIParser {
   private resolveSchemaType(schema?: any): string {
     if (!schema) return 'any';
 
-    // Handle $ref references
+    // Handle $ref references using proper JSON path resolution
     if (schema.$ref) {
-      const refName = schema.$ref.split('/').pop();
+      const refPath = schema.$ref;
+
+      // Resolve the reference to the actual schema object
+      const resolvedSchema = resolveRef(refPath, this.spec);
+
+      if (resolvedSchema) {
+        // Recursively resolve the actual schema type
+        // This handles nested $refs properly
+        return this.resolveSchemaType(resolvedSchema);
+      }
+
+      // Fallback: extract and normalize the reference name if resolution fails
+      const refName = getRefName(refPath);
       const normalizedName = this.normalizeName(refName || 'Any');
       return normalizedName;
     }

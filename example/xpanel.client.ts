@@ -16,21 +16,45 @@ function convertSearchParams(params: Record<string, any> | undefined): Record<st
 }
 
 
-export type GetApiV1UsersResponse = ModelsUser[];
+export type GetApiV1UsersResponse = {
+  created_at?: string;
+  email?: string;
+  id?: number;
+  updated_at?: string;
+  username?: string;
+}[];
 
-export type PostApiV1UsersResponse = ModelsUser;
+export type PostApiV1UsersResponse = {
+  created_at?: string;
+  email?: string;
+  id?: number;
+  updated_at?: string;
+  username?: string;
+};
 
 export interface GetApiV1UsersIdParams {
   id: any; // User ID
 }
 
-export type GetApiV1UsersIdResponse = ModelsUser;
+export type GetApiV1UsersIdResponse = {
+  created_at?: string;
+  email?: string;
+  id?: number;
+  updated_at?: string;
+  username?: string;
+};
 
 export interface PutApiV1UsersParams {
   id: any; // User ID
 }
 
-export type PutApiV1UsersResponse = ModelsUser;
+export type PutApiV1UsersResponse = {
+  created_at?: string;
+  email?: string;
+  id?: number;
+  updated_at?: string;
+  username?: string;
+};
 
 export interface DeleteApiV1UsersParams {
   id: any; // User ID
