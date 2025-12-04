@@ -224,7 +224,11 @@ export class OpenAPIParser {
       .replace(/[^a-zA-Z0-9]/g, ' ') // Replace special chars with spaces
       .split(/\s+/) // Split by spaces
       .filter((part) => part.length > 0) // Filter empty parts
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()) // Pascal case each part
+      .map((part) => {
+        // Convert to Pascal case: first letter uppercase, rest unchanged (preserves camelCase/PascalCase)
+        if (part.length === 0) return '';
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      })
       .join('');
 
     // Ensure it doesn't start with a number

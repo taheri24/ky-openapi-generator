@@ -1,0 +1,122 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "File Management API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://files.example.com" }],
+  "paths": {
+    "/files": {
+      "get": {
+        "summary": "List files",
+        "tags": ["files"],
+        "responses": {
+          "200": {
+            "description": "Files list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/FileInfo" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload file",
+        "tags": ["files"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileInfo" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}": {
+      "get": {
+        "summary": "Get file info",
+        "tags": ["files"],
+        "parameters": [
+          { "name": "file_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "File info",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileInfo" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete file",
+        "tags": ["files"],
+        "parameters": [
+          { "name": "file_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "204": {
+            "description": "File deleted"
+          }
+        }
+      }
+    },
+    "/files/{file_id}/download": {
+      "get": {
+        "summary": "Download file",
+        "tags": ["files"],
+        "parameters": [
+          { "name": "file_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "File content",
+            "content": {
+              "application/octet-stream": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FileInfo": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "size": { "type": "integer" },
+          "mime_type": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "url": { "type": "string", "format": "uri" }
+        }
+      }
+    }
+  }
+}

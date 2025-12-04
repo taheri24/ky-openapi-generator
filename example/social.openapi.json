@@ -1,0 +1,139 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Social Media API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://social.example.com/api" }],
+  "paths": {
+    "/users/{username}/profile": {
+      "get": {
+        "summary": "Get user profile",
+        "tags": ["users"],
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserProfile" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "summary": "List posts",
+        "tags": ["posts"],
+        "parameters": [
+          { "name": "filter", "in": "query", "schema": { "type": "string", "enum": ["recent", "trending", "following"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Posts list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Post" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create post",
+        "tags": ["posts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreatePostRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Post" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{post_id}/like": {
+      "post": {
+        "summary": "Like post",
+        "tags": ["interactions"],
+        "parameters": [
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post liked",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Post" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{username}/follow": {
+      "post": {
+        "summary": "Follow user",
+        "tags": ["relationships"],
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "User followed"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "username": { "type": "string" },
+          "display_name": { "type": "string" },
+          "bio": { "type": "string" },
+          "followers_count": { "type": "integer" },
+          "following_count": { "type": "integer" },
+          "posts_count": { "type": "integer" },
+          "profile_image_url": { "type": "string", "format": "uri" }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "author_id": { "type": "string" },
+          "content": { "type": "string" },
+          "likes_count": { "type": "integer" },
+          "comments_count": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreatePostRequest": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": { "type": "string" },
+          "image_urls": { "type": "array", "items": { "type": "string", "format": "uri" } }
+        }
+      }
+    }
+  }
+}

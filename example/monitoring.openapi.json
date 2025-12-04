@@ -1,0 +1,109 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "System Monitoring API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://monitoring.example.com" }],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "tags": ["health"],
+        "responses": {
+          "200": {
+            "description": "System healthy",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthStatus" }
+              }
+            }
+          },
+          "503": {
+            "description": "System unhealthy",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthStatus" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Get metrics",
+        "tags": ["metrics"],
+        "parameters": [
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["cpu", "memory", "disk", "network"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metrics data",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Metric" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "summary": "List active alerts",
+        "tags": ["alerts"],
+        "responses": {
+          "200": {
+            "description": "Alerts list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Alert" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["healthy", "degraded", "unhealthy"] },
+          "services": { "type": "array", "items": { "$ref": "#/components/schemas/ServiceStatus" } },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ServiceStatus": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["up", "down", "degraded"] },
+          "response_time_ms": { "type": "integer" }
+        }
+      },
+      "Metric": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Alert": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

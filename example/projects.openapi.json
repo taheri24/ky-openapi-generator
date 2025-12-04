@@ -1,0 +1,215 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Project Management API",
+    "version": "1.0.0",
+    "description": "Comprehensive project and task management"
+  },
+  "servers": [{ "url": "https://projects.example.com/api/v1" }],
+  "paths": {
+    "/projects": {
+      "get": {
+        "summary": "List projects",
+        "tags": ["projects"],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "completed", "archived"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projects list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Project" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create project",
+        "tags": ["projects"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateProjectRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Project created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Project" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}": {
+      "get": {
+        "summary": "Get project",
+        "tags": ["projects"],
+        "parameters": [
+          { "name": "project_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectDetail" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/tasks": {
+      "get": {
+        "summary": "List project tasks",
+        "tags": ["tasks"],
+        "parameters": [
+          { "name": "project_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tasks list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Task" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create task",
+        "tags": ["tasks"],
+        "parameters": [
+          { "name": "project_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateTaskRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task_id}/subtasks": {
+      "get": {
+        "summary": "List subtasks",
+        "tags": ["tasks"],
+        "parameters": [
+          { "name": "task_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subtasks list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/SubTask" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["active", "completed", "archived"] },
+          "owner_id": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ProjectDetail": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/Project" },
+          {
+            "type": "object",
+            "properties": {
+              "team_members": { "type": "array", "items": { "$ref": "#/components/schemas/TeamMember" } },
+              "tasks_count": { "type": "integer" },
+              "completed_tasks_count": { "type": "integer" }
+            }
+          }
+        ]
+      },
+      "CreateProjectRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "team_members": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "project_id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["todo", "in_progress", "done"] },
+          "assigned_to": { "type": "string" },
+          "due_date": { "type": "string", "format": "date" },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "assigned_to": { "type": "string" },
+          "due_date": { "type": "string", "format": "date" },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      },
+      "SubTask": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "task_id": { "type": "string" },
+          "title": { "type": "string" },
+          "completed": { "type": "boolean" }
+        }
+      },
+      "TeamMember": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string", "enum": ["owner", "admin", "member"] }
+        }
+      }
+    }
+  }
+}

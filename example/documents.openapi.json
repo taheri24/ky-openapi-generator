@@ -1,0 +1,128 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Document Management API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://docs.example.com/api" }],
+  "paths": {
+    "/documents": {
+      "get": {
+        "summary": "List documents",
+        "tags": ["documents"],
+        "parameters": [
+          { "name": "folder_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["pdf", "docx", "txt", "xlsx"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documents list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Document" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create document",
+        "tags": ["documents"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateDocumentRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Document" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{document_id}": {
+      "get": {
+        "summary": "Get document",
+        "tags": ["documents"],
+        "parameters": [
+          { "name": "document_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Document" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{document_id}/share": {
+      "post": {
+        "summary": "Share document",
+        "tags": ["sharing"],
+        "parameters": [
+          { "name": "document_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ShareDocumentRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Document shared"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Document": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "type": { "type": "string", "enum": ["pdf", "docx", "txt", "xlsx"] },
+          "size": { "type": "integer" },
+          "owner_id": { "type": "string" },
+          "folder_id": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateDocumentRequest": {
+        "type": "object",
+        "required": ["title", "type"],
+        "properties": {
+          "title": { "type": "string" },
+          "type": { "type": "string", "enum": ["pdf", "docx", "txt", "xlsx"] },
+          "folder_id": { "type": "string" },
+          "content": { "type": "string" }
+        }
+      },
+      "ShareDocumentRequest": {
+        "type": "object",
+        "required": ["user_ids"],
+        "properties": {
+          "user_ids": { "type": "array", "items": { "type": "string" } },
+          "permission": { "type": "string", "enum": ["view", "edit", "admin"] }
+        }
+      }
+    }
+  }
+}
